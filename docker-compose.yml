@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+
+  app:
+    build: .
+    container_name: ems-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/emsdb
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: pwd
+
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+      JAVA_OPTS: -Duser.timezone=Asia/Kolkata
+    restart: always
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: ems-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  postgres:
+    image: postgres:16
+    container_name: ems_postgres_db
+    environment:
+      TZ: Asia/Kolkata
+      PUTZ: Asia/Kolkata
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pwd
+      POSTGRES_DB: emsdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+
+
+
+volumes:
+  postgres_data:
