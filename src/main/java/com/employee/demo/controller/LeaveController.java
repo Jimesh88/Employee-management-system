@@ -1,11 +1,14 @@
 package com.employee.demo.controller;
 
-import com.employee.demo.config.NotificationProducer;
+import com.employee.demo.dto.LeaveRequestDto;
 import com.employee.demo.entities.LeaveRequest;
 import com.employee.demo.entities.LeaveRequest.LeaveStatus;
+import com.employee.demo.mapper.LeaveRequestMapper;
 import com.employee.demo.service.LeaveService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,40 +19,52 @@ import java.util.List;
 public class LeaveController {
 
     private final LeaveService leaveService;
-    private final NotificationProducer notificationProducer;
+    private final LeaveRequestMapper leaveRequestMapper;
 
-    //  Submit Leave Request (USER)
+    // Submit Leave Request (USER)
     @PostMapping
-    public LeaveRequest submitLeave(@RequestBody @Valid LeaveRequest leaveRequest) {
-        return leaveService.applyLeave(leaveRequest);
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<LeaveRequestDto> submitLeave(
+            @RequestBody @Valid LeaveRequestDto leaveRequestDto) {
+
+        LeaveRequest leaveRequest =
+                leaveRequestMapper.toEntity(leaveRequestDto);
+
+        LeaveRequest saved =
+                leaveService.applyLeave(leaveRequest);
+
+        return ResponseEntity.ok(
+                leaveRequestMapper.toDto(saved)
+        );
     }
 
-    //  Update Leave Status (ADMIN)
+    // Update Leave Status (ADMIN)
     @PutMapping("/{id}/status")
-    public LeaveRequest updateLeaveStatus(
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<LeaveRequestDto> updateLeaveStatus(
             @PathVariable Long id,
             @RequestParam LeaveStatus status) {
 
-        LeaveRequest updated = leaveService.updateLeaveStatus(id, status);
+        LeaveRequest updated =
+                leaveService.updateLeaveStatus(id, status);
 
-        // 🔔 RabbitMQ Notification
-        String message = String.format(
-                "LEAVE UPDATE | RequestId=%d | Employee=%s | Dates=%s to %s | Status=%s",
-                updated.getId(),
-                updated.getEmployee().getFullName(),
-                updated.getStartDate(),
-                updated.getEndDate(),
-                updated.getStatus()
+        return ResponseEntity.ok(
+                leaveRequestMapper.toDto(updated)
         );
-
-        notificationProducer.sendNotification(message);
-
-        return updated;
     }
 
-    //  View Employee Leaves (USER / ADMIN)
+    //  View Employee Leaves ( ADMIN)
     @GetMapping("/employee/{empId}")
-    public List<LeaveRequest> getEmployeeLeaves(@PathVariable Long empId) {
-        return leaveService.getLeavesByEmployee(empId);
+    @PreAuthorize("hasRole('USER','ADMIN')")
+    public ResponseEntity<List<LeaveRequestDto>> getEmployeeLeaves(
+            @PathVariable Long empId) {
+
+        List<LeaveRequestDto> leaves =
+                leaveService.getLeavesByEmployee(empId)
+                        .stream()
+                        .map(leaveRequestMapper::toDto)
+                        .toList();
+
+        return ResponseEntity.ok(leaves);
     }
 }

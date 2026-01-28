@@ -2,7 +2,6 @@ package com.employee.demo.service;
 
 import com.employee.demo.Exception.EmployeeDeletionException;
 import com.employee.demo.Exception.EmployeeNotFoundException;
-import com.employee.demo.config.NotificationProducer;
 import com.employee.demo.entities.Employee;
 import com.employee.demo.repository.EmployeeRepository;
 import com.employee.demo.repository.LeaveRequestRepository;

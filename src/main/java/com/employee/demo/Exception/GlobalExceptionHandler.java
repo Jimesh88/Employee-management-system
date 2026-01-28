@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
       return  buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
-    // 🔴 Employee Not Found
+    //Employee Not Found
     @ExceptionHandler(EmployeeNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleEmployeeNotFound(
             EmployeeNotFoundException ex) {
@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // 🔴 Department Not Found
+    // Department Not Found
     @ExceptionHandler(DepartmentNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleDepartmentNotFound(
             DepartmentNotFoundException ex) {
@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // 🔴 Leave Request Not Found
+    // Leave Request Not Found
     @ExceptionHandler(LeaveRequestNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleLeaveNotFound(
             LeaveRequestNotFoundException ex) {
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    // 🔴 Generic fallback
+    //  Generic fallback
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
 
@@ -55,6 +55,16 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred"
         );
     }
+
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<?> handleResourceNotFound(ResourceNotFoundException ex) {
+        return buildErrorResponse(
+                HttpStatus.NOT_FOUND,
+                ex.getMessage()
+        );
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(
             MethodArgumentNotValidException ex) {
@@ -70,7 +80,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    // 🔧 Common response builder
+    // Common response builder
     private ResponseEntity<Map<String, Object>> buildErrorResponse(
             HttpStatus status, String message) {
 

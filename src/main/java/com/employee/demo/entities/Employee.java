@@ -29,25 +29,19 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Full name is required")
     @Column(nullable = false)
     private String fullName;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NotNull(message = "Department is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    @Positive(message = "Salary must be positive")
     private BigDecimal salary;
 
-    @NotNull(message = "Joining date is required")
-    @PastOrPresent(message = "Joining date cannot be in the future")
     @Column(nullable = false)
     private LocalDate joiningDate;
 

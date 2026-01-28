@@ -1,13 +1,15 @@
 package com.employee.demo.controller;
 
-
-
+import com.employee.demo.dto.EmployeeDto;
 import com.employee.demo.entities.Employee;
+import com.employee.demo.mapper.EmployeeMapper;
 import com.employee.demo.service.EmployeeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,37 +19,63 @@ import org.springframework.web.bind.annotation.*;
 public class EmployeeController {
 
     private final EmployeeService employeeService;
+    private final EmployeeMapper employeeMapper;
 
+    // List Employees (optional department filter)
     @GetMapping
-    public Page<Employee> getEmployees(
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<EmployeeDto> getEmployees(
             @RequestParam(required = false) Long departmentId,
-            Pageable xd) {
-        return employeeService.getEmployees(departmentId, pageable);
+            Pageable pageable) {
+
+        return employeeService.getEmployees(departmentId, pageable)
+                .map(employeeMapper::toDto);
     }
 
+    // Get Employee by ID
     @GetMapping("/{id}")
-    public Employee getEmployee(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+    public EmployeeDto getEmployee(@PathVariable Long id) {
+        Employee employee = employeeService.getEmployeeById(id);
+        return employeeMapper.toDto(employee);
     }
 
+    //  Get Logged-in Employee Profile
     @GetMapping("/me")
-    public Employee getMyProfile(Authentication auth) {
-        return employeeService.getCurrentEmployee(auth.getName());
+    public EmployeeDto getMyProfile(Authentication auth) {
+        Employee employee = employeeService.getCurrentEmployee(auth.getName());
+        return employeeMapper.toDto(employee);
     }
 
+    // Create Employee
     @PostMapping
-    public ResponseEntity<Employee> create(@RequestBody @Valid Employee employee) {
-        return ResponseEntity.ok(employeeService.createEmployee(employee));
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmployeeDto> create(
+            @RequestBody @Valid EmployeeDto employeeDto) {
+
+        Employee employee = employeeMapper.toEntity(employeeDto);
+        Employee saved = employeeService.createEmployee(employee);
+
+        return ResponseEntity.ok(employeeMapper.toDto(saved));
     }
 
+    // Update Employee
     @PutMapping("/{id}")
-    public Employee update(@PathVariable Long id,
-                           @RequestBody Employee employee) {
-        return employeeService.updateEmployee(id, employee);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<EmployeeDto> update(
+            @PathVariable Long id,
+            @RequestBody @Valid EmployeeDto employeeDto) {
+
+        Employee employee = employeeMapper.toEntity(employeeDto);
+        Employee updated = employeeService.updateEmployee(id, employee);
+
+        return ResponseEntity.ok(employeeMapper.toDto(updated));
     }
 
+    // Delete Employee
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
         employeeService.deleteEmployee(id);
+        return ResponseEntity.noContent().build();
     }
 }

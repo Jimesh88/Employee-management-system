@@ -3,6 +3,7 @@ package com.employee.demo.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -18,18 +20,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-
-                        // Department management → ADMIN only
-                        .requestMatchers("/api/departments/**").hasRole("ADMIN")
-
-                        // Employee management
-                        .requestMatchers("/api/employees/**").hasRole("ADMIN")
-
-                        // Leave APIs
-                        .requestMatchers("PUT", "/api/leaves/*/status").hasRole("ADMIN")
-                        .requestMatchers("/api/leaves/**").authenticated()
-
-                        // Everything else
+                        // Only authentication here
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());
@@ -53,4 +44,3 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(admin, user);
     }
 }
-
