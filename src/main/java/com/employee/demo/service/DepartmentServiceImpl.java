@@ -1,6 +1,5 @@
 package com.employee.demo.service;
 
-import com.employee.demo.Exception.DepartmentNotFoundException;
 import com.employee.demo.Exception.ResourceNotFoundException;
 import com.employee.demo.config.NotificationProducer;
 import com.employee.demo.entities.Department;
@@ -55,6 +54,6 @@ public class DepartmentServiceImpl implements DepartmentService {
                     "Department not found with id: " + departmentId
             );
         }
-       return employeeRepository.findByDepartment_Id(departmentId,pageable);
+       return employeeRepository.findEmployeesByDepartment(departmentId,pageable);
     }
 }

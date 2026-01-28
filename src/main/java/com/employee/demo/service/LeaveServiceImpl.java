@@ -1,11 +1,15 @@
 package com.employee.demo.service;
 
 
+import com.employee.demo.Exception.EmployeeNotFoundException;
 import com.employee.demo.Exception.LeaveRequestNotFoundException;
 import com.employee.demo.config.NotificationProducer;
+import com.employee.demo.dto.LeaveRequestCreateDto;
+import com.employee.demo.entities.Employee;
 import com.employee.demo.entities.LeaveRequest;
+import com.employee.demo.entities.LeaveStatus;
+import com.employee.demo.repository.EmployeeRepository;
 import com.employee.demo.repository.LeaveRequestRepository;
-import com.employee.demo.service.LeaveService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,15 +21,30 @@ public class LeaveServiceImpl implements LeaveService {
 
     private final LeaveRequestRepository leaveRepository;
     private final NotificationProducer notificationProducer;
+    private final EmployeeRepository employeeRepository;
 
-    @Override
-    public LeaveRequest applyLeave(LeaveRequest leaveRequest) {
-        leaveRequest.setStatus(LeaveRequest.LeaveStatus.PENDING);
-        return leaveRepository.save(leaveRequest);
+    public LeaveRequest applyLeave(LeaveRequestCreateDto dto) {
+
+        Employee employee = employeeRepository.findById(dto.getEmployeeId())
+                .orElseThrow(() ->
+                        new EmployeeNotFoundException(dto.getEmployeeId().toString()));
+
+        LeaveRequest leave = new LeaveRequest();
+        leave.setEmployee(employee);
+        leave.setStartDate(dto.getStartDate());
+        leave.setEndDate(dto.getEndDate());
+        leave.setReason(dto.getReason());
+
+        // backend-controlled
+        leave.setStatus(LeaveStatus.PENDING);
+
+        return leaveRepository.save(leave);
     }
 
+
+
     @Override
-    public LeaveRequest updateLeaveStatus(Long leaveId, LeaveRequest.LeaveStatus status) {
+    public LeaveRequest updateLeaveStatus(Long leaveId, LeaveStatus status) {
         LeaveRequest leave = leaveRepository.findById(leaveId)
                 .orElseThrow(() -> new LeaveRequestNotFoundException("Leave request not found"));
 
@@ -46,6 +65,13 @@ public class LeaveServiceImpl implements LeaveService {
 
     @Override
     public List<LeaveRequest> getLeavesByEmployee(Long employeeId) {
+
+        // optional: validate employee exists
+        if (!employeeRepository.existsById(employeeId)) {
+            throw new EmployeeNotFoundException(employeeId.toString());
+        }
+
         return leaveRepository.findByEmployee_Id(employeeId);
     }
+
 }

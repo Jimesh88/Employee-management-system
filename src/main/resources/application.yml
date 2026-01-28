@@ -6,7 +6,7 @@ spring:
     password: guest
     virtual-host: /
   datasource:
-    url: jdbc:postgresql://localhost:5432/emsdb?TimeZone=Asia/Kolkata
+    url: jdbc:postgresql://localhost:5432/emsdb
     username: user
     password: pwd
     driver-class-name: org.postgresql.Driver

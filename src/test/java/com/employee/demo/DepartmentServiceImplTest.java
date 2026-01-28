@@ -82,7 +82,7 @@ class DepartmentServiceImplTest {
     void getEmployeesByDepartment_whenValid_shouldReturnPage() {
 
         when(departmentRepository.existsById(1L)).thenReturn(true);
-        when(employeeRepository.findByDepartment_Id(eq(1L), any()))
+        when(employeeRepository.findEmployeesByDepartment(eq(1L), any()))
                 .thenReturn(new PageImpl<>(List.of(new Employee())));
 
         Page<Employee> result =

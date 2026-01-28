@@ -41,9 +41,5 @@ public class LeaveRequest {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    public enum LeaveStatus {
-        PENDING,
-        APPROVED,
-        REJECTED
-    }
+
 }

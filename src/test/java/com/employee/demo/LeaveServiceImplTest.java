@@ -2,10 +2,12 @@ package com.employee.demo;
 
 
 import com.employee.demo.config.NotificationProducer;
+import com.employee.demo.dto.LeaveRequestCreateDto;
 import com.employee.demo.entities.Employee;
 import com.employee.demo.entities.LeaveRequest;
-import com.employee.demo.entities.LeaveRequest.LeaveStatus;
+import com.employee.demo.entities.LeaveStatus;
 import com.employee.demo.Exception.LeaveRequestNotFoundException;
+import com.employee.demo.repository.EmployeeRepository;
 import com.employee.demo.repository.LeaveRequestRepository;
 import com.employee.demo.service.LeaveServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -32,23 +34,49 @@ class LeaveServiceImplTest {
     @InjectMocks
     private LeaveServiceImpl leaveService;
 
-    // ---------- applyLeave ----------
+    @Mock
+    private EmployeeRepository employeeRepository;
 
+    @Mock
+    LeaveRequestCreateDto leaveRequestCreateDto;
+
+    // ---------- applyLeave ----------
     @Test
     void applyLeave_shouldSetStatusToPending_andSave() {
 
-        LeaveRequest leave = new LeaveRequest();
-        leave.setStatus(null);
+        // given
+        LeaveRequestCreateDto dto = new LeaveRequestCreateDto();
+        dto.setEmployeeId(1L);
+        dto.setStartDate(LocalDate.now());
+        dto.setEndDate(LocalDate.now().plusDays(2));
+        dto.setReason("Medical leave");
+
+        Employee employee = new Employee();
+        employee.setId(1L);
+
+        when(employeeRepository.findById(1L))
+                .thenReturn(Optional.of(employee));
 
         when(leaveRepository.save(any(LeaveRequest.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        LeaveRequest saved = leaveService.applyLeave(leave);
+        // when
+        LeaveRequest saved = leaveService.applyLeave(dto);
 
+        // then
+        assertThat(saved).isNotNull();
+        assertThat(saved.getEmployee()).isEqualTo(employee);
+        assertThat(saved.getStartDate()).isEqualTo(dto.getStartDate());
+        assertThat(saved.getEndDate()).isEqualTo(dto.getEndDate());
+        assertThat(saved.getReason()).isEqualTo(dto.getReason());
         assertThat(saved.getStatus()).isEqualTo(LeaveStatus.PENDING);
-        verify(leaveRepository).save(leave);
-        verifyNoInteractions(notificationProducer);
+
+        verify(employeeRepository).findById(1L);
+        verify(leaveRepository).save(any(LeaveRequest.class));
+        verifyNoMoreInteractions(employeeRepository, leaveRepository);
     }
+
+
 
     // ---------- updateLeaveStatus ----------
 
@@ -101,13 +129,22 @@ class LeaveServiceImplTest {
     @Test
     void getLeavesByEmployee_shouldReturnLeaveList() {
 
+        // given
+        when(employeeRepository.existsById(1L))
+                .thenReturn(true);
+
         when(leaveRepository.findByEmployee_Id(1L))
                 .thenReturn(List.of(new LeaveRequest(), new LeaveRequest()));
 
+        // when
         List<LeaveRequest> result =
                 leaveService.getLeavesByEmployee(1L);
 
+        // then
         assertThat(result).hasSize(2);
+
+        verify(employeeRepository).existsById(1L);
         verify(leaveRepository).findByEmployee_Id(1L);
     }
+
 }

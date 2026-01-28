@@ -39,12 +39,6 @@ public class EmployeeController {
         return employeeMapper.toDto(employee);
     }
 
-    //  Get Logged-in Employee Profile
-    @GetMapping("/me")
-    public EmployeeDto getMyProfile(Authentication auth) {
-        Employee employee = employeeService.getCurrentEmployee(auth.getName());
-        return employeeMapper.toDto(employee);
-    }
 
     // Create Employee
     @PostMapping
