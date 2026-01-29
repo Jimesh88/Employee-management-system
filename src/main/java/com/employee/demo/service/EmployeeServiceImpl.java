@@ -2,6 +2,7 @@ package com.employee.demo.service;
 
 import com.employee.demo.Exception.EmployeeDeletionException;
 import com.employee.demo.Exception.EmployeeNotFoundException;
+import com.employee.demo.config.NotificationProducer;
 import com.employee.demo.entities.Employee;
 import com.employee.demo.repository.EmployeeRepository;
 import com.employee.demo.repository.LeaveRequestRepository;
@@ -16,6 +17,8 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     private final EmployeeRepository employeeRepository;
     private final LeaveRequestRepository leaveRepository;
+    private final NotificationProducer notificationProducer;
+
 
     @Override
     public Page<Employee> getEmployees(Long departmentId, Pageable pageable) {
@@ -39,7 +42,19 @@ public class EmployeeServiceImpl implements EmployeeService{
 
     @Override
     public Employee createEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+        Employee savedEmployee= employeeRepository.save(employee);
+        // Build a meaningful message
+        String message = String.format(
+                "Employee created | id=%d | department=%s | full name=%s | email =%s",
+                savedEmployee.getId(),
+                savedEmployee.getDepartment(),
+                savedEmployee.getFullName(),
+                savedEmployee.getEmail()
+        );
+
+        notificationProducer.sendNotification(message);
+
+        return savedEmployee;
     }
 
     @Override

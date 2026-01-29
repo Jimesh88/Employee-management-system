@@ -28,8 +28,6 @@ class DepartmentServiceImplTest {
     @Mock
     private EmployeeRepository employeeRepository;
 
-    @Mock
-    private NotificationProducer notificationProducer;
 
     @InjectMocks
     private DepartmentServiceImpl departmentService;
@@ -52,8 +50,7 @@ class DepartmentServiceImplTest {
 
         assertThat(result.getId()).isEqualTo(1L);
         verify(departmentRepository).save(department);
-        verify(notificationProducer)
-                .sendNotification(contains("Department created"));
+
     }
 
     @Test

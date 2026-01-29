@@ -3,6 +3,7 @@ package com.employee.demo;
 
 import com.employee.demo.Exception.EmployeeDeletionException;
 import com.employee.demo.Exception.EmployeeNotFoundException;
+import com.employee.demo.config.NotificationProducer;
 import com.employee.demo.entities.Department;
 import com.employee.demo.entities.Employee;
 import com.employee.demo.repository.EmployeeRepository;
@@ -33,6 +34,9 @@ class EmployeeServiceImplTest {
 
     @InjectMocks
     private EmployeeServiceImpl employeeService;
+
+    @Mock
+    private NotificationProducer notificationProducer;
 
     // ---------- getEmployees ----------
 
@@ -135,6 +139,8 @@ class EmployeeServiceImplTest {
 
         assertThat(saved).isNotNull();
         verify(employeeRepository).save(employee);
+        verify(notificationProducer)
+                .sendNotification(contains("Employee created"));
     }
 
     // ---------- updateEmployee ----------

@@ -1,7 +1,6 @@
 package com.employee.demo.service;
 
 import com.employee.demo.Exception.ResourceNotFoundException;
-import com.employee.demo.config.NotificationProducer;
 import com.employee.demo.entities.Department;
 import com.employee.demo.entities.Employee;
 import com.employee.demo.repository.DepartmentRepository;
@@ -19,25 +18,12 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final EmployeeRepository employeeRepository;
-    private final NotificationProducer notificationProducer;
 
 
     @Override
     public Department createDepartment(Department department) {
 
-        Department saved = departmentRepository.save(department);
-
-        // Build a meaningful message
-        String message = String.format(
-                "Department created | id=%d | name=%s",
-                saved.getId(),
-                saved.getName()
-        );
-
-        // Publish notification
-        notificationProducer.sendNotification(message);
-
-        return saved;
+        return departmentRepository.save(department);
     }
 
 
