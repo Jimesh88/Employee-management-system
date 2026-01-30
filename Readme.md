@@ -228,6 +228,23 @@ mvn test
 * Leave status update by admin
 
 ---
+## 8. Docker instructions
+
+Build the application JAR using mvn clean package
+
+Build Docker images using docker compose build app
+
+Start all services using docker compose up -d
+
+Access the application at http://localhost:8080
+
+Access RabbitMQ management UI at http://localhost:15672 (guest / guest)
+
+PostgreSQL runs on port 5432 with database emsdb
+
+Stop all services using docker compose down
+
+Remove containers and volumes using docker compose down -v
 
 ## 8. Future Enhancements
 
